@@ -1,68 +1,82 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Button } from '../ui/Button';
+import { Textarea } from '../ui/Textarea';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { postsApi } from '../../lib/api';
-import { Button } from '../ui/Button';
-import { Card, CardContent, CardFooter } from '../ui/Card';
-import { Textarea } from '../ui/Textarea';
-import type { PrivacyType } from '../../types/api';
+import { Avatar } from '../ui/Avatar';
+import type { PostResponseDto, PrivacyType, UserResponseDto } from '../../types/api';
 
-export function CreatePost() {
-  const [content, setContent] = useState('');
-  const [privacy, setPrivacy] = useState<PrivacyType>(0);
+export interface CreatePostProps {
+  post: PostResponseDto | null;
+  onClose: () => void;
+  currentUser: UserResponseDto;
+}
+
+export function CreatePost({ post, onClose, currentUser }: CreatePostProps) {
+  const isEdit = !!post;
+  const [content, setContent] = useState(post?.content || '');
+  const [privacy, setPrivacy] = useState<PrivacyType>(post?.privacy ?? 0);
   const queryClient = useQueryClient();
 
-  const createPostMutation = useMutation({
-    mutationFn: postsApi.create,
+  useEffect(() => {
+    if (isEdit) {
+      setContent(post?.content || '');
+      setPrivacy(post?.privacy ?? 0);
+    } else {
+      setContent('');
+      setPrivacy(0);
+    }
+  }, [isEdit, post]);
+
+  const mutation = useMutation({
+    mutationFn: (data: { content: string; privacy: PrivacyType }) =>
+      isEdit && post ? postsApi.update(post.id, data) : postsApi.create(data),
     onSuccess: () => {
       setContent('');
+      setPrivacy(0);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      onClose();
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
-
-    createPostMutation.mutate({
-      content: content.trim(),
-      privacy,
-    });
+    mutation.mutate({ content: content.trim(), privacy });
   };
 
   return (
-    <Card className="mb-6">
-      <form onSubmit={handleSubmit}>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <Textarea
-              placeholder="What's on your mind?"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[100px] resize-none"
-              required
-            />
-            <div className="flex items-center space-x-4">
-              <select
-                value={privacy}
-                onChange={(e) => setPrivacy(Number(e.target.value) as PrivacyType)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value={0}>Public</option>
-                <option value={1}>Friends</option>
-                <option value={2}>Private</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
-          <Button
-            type="submit"
-            disabled={createPostMutation.isPending || !content.trim()}
+    <form onSubmit={handleSubmit} className="flex flex-col">
+      <div className="flex items-center gap-3 p-6 pb-2 border-b border-[#e3e8f0] dark:border-[#2a2d34]">
+        <Avatar src={currentUser.avatarUrl} alt={currentUser.username || 'User'} size={40} />
+        <div className="flex flex-col">
+          <span className="font-bold text-base text-[#232946] dark:text-[#E4E6EB]">{currentUser.username}</span>
+          <select
+            value={privacy}
+            onChange={e => setPrivacy(Number(e.target.value) as PrivacyType)}
+            className="rounded-md border border-input bg-background px-2 py-1 text-xs mt-1"
           >
-            {createPostMutation.isPending ? 'Posting...' : 'Post'}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+            <option value={0}>Public</option>
+            <option value={1}>Friends</option>
+            <option value={2}>Private</option>
+          </select>
+        </div>
+      </div>
+      <div className="p-6 pt-4 flex-1">
+        <Textarea
+          placeholder="What's on your mind?"
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          className="min-h-[120px] resize-none text-lg"
+          required
+        />
+      </div>
+      <div className="flex justify-end gap-2 px-6 pb-6">
+        <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button type="submit" disabled={mutation.isPending || !content.trim()}>
+          {mutation.isPending ? (isEdit ? 'Saving...' : 'Posting...') : isEdit ? 'Save' : 'Post'}
+        </Button>
+      </div>
+    </form>
   );
 } 

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { feedApi, commentsApi } from "../lib/api";
 import { useAuthStore } from "../store/auth";
-import { CreatePost } from "../components/post/CreatePost";
 import { Post } from "../components/post/Post";
 import { useState } from "react";
 import { Modal } from "../components/ui/Modal";
@@ -11,12 +10,15 @@ import placeholderUserAvatar from "../assets/images/placeholder_user_avatar.png"
 import { Button } from "../components/ui/Button";
 import { Avatar } from "../components/ui/Avatar";
 import { UserMeta } from "../components/ui/UserMeta";
+import { CreateEditPostModal } from '../components/post/CreateEditPostModal';
 
 export function Feed() {
   const currentUser = useAuthStore((state) => state.user);
   const [commentModalPost, setCommentModalPost] = useState<any | null>(null); // selected post for modal
   const [commentText, setCommentText] = useState("");
   const queryClient = useQueryClient();
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [editPost, setEditPost] = useState(null);
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ["feed", currentUser?.id],
@@ -69,7 +71,20 @@ export function Feed() {
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-gradient-to-br from-[#eaf0fa] via-[#f8fbff] to-[#f0f4ff] dark:from-[#181823] dark:via-[#232946] dark:to-[#232946] py-10 px-2">
       <div className="mx-auto max-w-2xl space-y-6">
-        <CreatePost />
+        {/* Fake input to open create post modal */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 bg-white dark:bg-[#232946] rounded-xl shadow px-4 py-3 cursor-pointer border border-[#e3e8f0] dark:border-[#2a2d34]" onClick={() => { setEditPost(null); setShowPostModal(true); }}>
+            <Avatar src={currentUser.avatarUrl} alt={currentUser.username || 'User'} size={40} />
+            <div className="flex-1">
+              <input
+                type="text"
+                className="w-full bg-transparent outline-none text-[#65676B] dark:text-[#B0B3B8] placeholder-[#65676B] dark:placeholder-[#B0B3B8] cursor-pointer"
+                placeholder={`What's on your mind, ${currentUser.username}?`}
+                readOnly
+              />
+            </div>
+          </div>
+        </div>
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading posts...</p>
@@ -79,15 +94,16 @@ export function Feed() {
             <p className="text-muted-foreground">No posts yet</p>
           </div>
         ) : (
-          posts?.data.data.map((post) => (
-            <Post
-              key={post.id}
-              post={post}
-              onOpenCommentModal={() => setCommentModalPost(post)}
-            />
-          ))
+          posts?.data.data.map((post) => <Post key={post.id} post={post} onOpenCommentModal={() => setCommentModalPost(post)} onEdit={() => { setEditPost(post); setShowPostModal(true); }} />)
         )}
       </div>
+      {/* Global create/edit post modal */}
+      <CreateEditPostModal
+        open={showPostModal}
+        onClose={() => setShowPostModal(false)}
+        post={editPost}
+        currentUser={currentUser}
+      />
       {/* Global comment modal */}
       <Modal
         open={!!commentModalPost}
