@@ -23,8 +23,8 @@ export function Layout() {
       <header className="fixed top-0 w-full z-50 border-b border-[#DADDE1] dark:border-[#3E4042] bg-white dark:bg-[#242526] shadow-sm">
         <div className="max-w-full flex h-14 items-center px-5">
           <div className="mr-4 flex">
-            <a className="mr-6 flex items-center space-x-2" href="/">
-              <span className="font-bold text-xl">SocialApp</span>
+            <a className="mr-6 flex items-center space-x-2" onClick={() => navigate("/")} href="#">
+              <span className="font-bold text-xl">FuckBook</span>
             </a>
           </div>
           <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">

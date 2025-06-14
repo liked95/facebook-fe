@@ -83,4 +83,12 @@ export const usersApi = {
     }),
 };
 
+// Feed API
+export const feedApi = {
+  getFeed: (pageNumber = 1, pageSize = 25) =>
+    api.get<ApiResponse<PostResponseDto[]>>(`/Api/Feed`, {
+      params: { pageNumber, pageSize },
+    }),
+};
+
 export default api; 

@@ -1,10 +1,10 @@
 // App.jsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout } from './components/layout/Layout';
-import { Home } from './pages/Home';
-import { Login } from './pages/auth/Login';
-import { Register } from './pages/auth/Register';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Layout } from "./components/layout/Layout";
+import { Feed } from "./pages/Feed";
+import { Login } from "./pages/auth/Login";
+import { Register } from "./pages/auth/Register";
 
 const queryClient = new QueryClient();
 
@@ -14,7 +14,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Feed />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             {/* Add more routes as needed */}

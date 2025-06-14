@@ -15,6 +15,8 @@ export function Login() {
     password: '',
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (response) => {
@@ -22,6 +24,10 @@ export function Login() {
         setAuth(response.data.data.user, response.data.data.token);
         navigate('/');
       }
+    },
+    onError: (error) => {
+      console.error(error);
+      setErrorMessage(error?.response?.data?.message || 'Something went wrong');
     },
   });
 
@@ -76,7 +82,7 @@ export function Login() {
             </div>
             {loginMutation.isError && (
               <p className="text-sm text-red-500">
-                Invalid email or password
+                {errorMessage}
               </p>
             )}
           </CardContent>

@@ -1,15 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
-import { usersApi } from '../lib/api';
-import { useAuthStore } from '../store/auth';
-import { CreatePost } from '../components/post/CreatePost';
-import { Post } from '../components/post/Post';
+import { useQuery } from "@tanstack/react-query";
+import { feedApi } from "../lib/api";
+import { useAuthStore } from "../store/auth";
+import { CreatePost } from "../components/post/CreatePost";
+import { Post } from "../components/post/Post";
 
-export function Home() {
+export function Feed() {
   const currentUser = useAuthStore((state) => state.user);
 
   const { data: posts, isLoading } = useQuery({
-    queryKey: ['posts', currentUser?.id],
-    queryFn: () => usersApi.getPosts(currentUser!.id),
+    queryKey: ["feed", currentUser?.id],
+    queryFn: () => feedApi.getFeed(),
     enabled: !!currentUser,
   });
 
@@ -35,10 +35,8 @@ export function Home() {
           <p className="text-muted-foreground">No posts yet</p>
         </div>
       ) : (
-        posts?.data.data.map((post) => (
-          <Post key={post.id} post={post} />
-        ))
+        posts?.data.data.map((post) => <Post key={post.id} post={post} />)
       )}
     </div>
   );
-} 
+}

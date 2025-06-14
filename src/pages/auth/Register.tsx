@@ -16,6 +16,8 @@ export function Register() {
     password: '',
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const registerMutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: (response) => {
@@ -23,6 +25,10 @@ export function Register() {
         setAuth(response.data.data.user, response.data.data.token);
         navigate('/');
       }
+    },
+    onError: (error) => {
+      console.error(error);
+      setErrorMessage(error?.response?.data?.message || 'Something went wrong');
     },
   });
 
@@ -94,9 +100,7 @@ export function Register() {
             </div>
             {registerMutation.isError && (
               <p className="text-sm text-red-500">
-                {registerMutation.error instanceof Error
-                  ? registerMutation.error.message
-                  : 'An error occurred during registration'}
+                {errorMessage}
               </p>
             )}
           </CardContent>
