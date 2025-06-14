@@ -4,16 +4,16 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'font-facebook font-sans rounded-md px-4 py-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:text-black dark:hover:bg-blue-400',
-        destructive: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-black dark:hover:bg-red-400',
-        outline: 'border border-zinc-300 bg-white hover:bg-zinc-100 hover:text-black dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white',
-        secondary: 'bg-zinc-200 text-black hover:bg-zinc-300 dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-600',
-        ghost: 'hover:bg-zinc-100 hover:text-black dark:hover:bg-zinc-800 dark:hover:text-white',
-        link: 'text-blue-600 underline-offset-4 hover:underline dark:text-blue-400',
+        default: 'bg-[#1877F2] text-white hover:bg-[#166FE5]',
+        secondary: 'bg-[#E4E6EB] text-[#050505] hover:bg-[#D8DADF] dark:bg-[#3A3B3C] dark:text-[#E4E6EB] dark:hover:bg-[#4A4B4D]',
+        danger: 'bg-[#FA3E3E] text-white hover:bg-[#E03131]',
+        ghost: 'bg-transparent text-[#050505] hover:bg-[#E4E6EB] dark:text-[#E4E6EB] dark:hover:bg-[#3A3B3C]',
+        outline: 'border border-[#DADDE1] dark:border-[#3E4042] bg-white dark:bg-[#242526] text-[#050505] dark:text-[#E4E6EB] hover:bg-[#E4E6EB] dark:hover:bg-[#3A3B3C]',
+        link: 'text-[#1877F2] underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',
