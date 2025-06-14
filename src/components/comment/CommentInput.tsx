@@ -9,11 +9,12 @@ export interface CommentInputProps {
   error?: string;
   avatarUrl?: string | null;
   username?: string | null;
+  placeholder?: string;
 }
 
-export function CommentInput({ value, onChange, onSubmit, loading, error, avatarUrl, username }: CommentInputProps) {
+export function CommentInput({ value, onChange, onSubmit, loading, error, avatarUrl, username, placeholder }: CommentInputProps) {
   return (
-    <form onSubmit={onSubmit} className="flex items-start gap-2 mt-4">
+    <form onSubmit={onSubmit} className="flex items-start gap-2">
       <img
         src={avatarUrl || '/avatar.png'}
         alt={username || 'User'}
@@ -23,7 +24,7 @@ export function CommentInput({ value, onChange, onSubmit, loading, error, avatar
         <Textarea
           value={value}
           onChange={e => onChange(e.target.value)}
-          placeholder="Write a comment..."
+          placeholder={placeholder || 'Write a comment...'}
           className="min-h-[40px] resize-none"
           required
         />

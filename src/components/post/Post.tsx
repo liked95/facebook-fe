@@ -1,26 +1,23 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { postsApi, commentsApi } from '../../lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { postsApi } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
 import { Card, CardContent, CardFooter, CardHeader } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Avatar } from '../ui/Avatar';
 import { UserMeta } from '../ui/UserMeta';
 import type { PostResponseDto } from '../../types/api';
-import { Modal } from '../ui/Modal';
-import { CommentInput } from '../comment/CommentInput';
-import { CommentList } from '../comment/CommentList';
+import { Divider } from '../ui/Divider';
 
 export interface PostProps {
   post: PostResponseDto;
   onEdit?: () => void;
+  onOpenCommentModal?: () => void;
 }
 
-export function Post({ post, onEdit }: PostProps) {
+export function Post({ post, onEdit, onOpenCommentModal }: PostProps) {
   const currentUser = useAuthStore((state) => state.user);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
-  const [commentText, setCommentText] = useState('');
   const queryClient = useQueryClient();
   const isOwner = currentUser?.id === post.userId;
 
@@ -38,26 +35,6 @@ export function Post({ post, onEdit }: PostProps) {
       setIsDeleting(true);
       deleteMutation.mutate();
     }
-  };
-
-  // Modal comment logic
-  const { data: commentsData, isLoading: commentsLoading } = useQuery({
-    queryKey: ['comments', post.id],
-    queryFn: () => commentsApi.getByPost(post.id).then(res => res.data.data),
-    enabled: showCommentModal,
-  });
-  const addCommentMutation = useMutation({
-    mutationFn: (content: string) => commentsApi.create(post.id, { content }),
-    onSuccess: () => {
-      setCommentText('');
-      queryClient.invalidateQueries({ queryKey: ['comments', post.id] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-  });
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    addCommentMutation.mutate(commentText.trim());
   };
 
   return (
@@ -78,9 +55,9 @@ export function Post({ post, onEdit }: PostProps) {
           </div>
         )}
       </CardHeader>
-      <CardContent className="px-6 pb-2 pt-4">
+      <CardContent className="px-6 py-4">
         {post.content && (
-          <div className="mb-4 text-lg text-[#232946] dark:text-[#E4E6EB] whitespace-pre-line leading-relaxed">
+          <div className="text-lg text-[#232946] dark:text-[#E4E6EB] whitespace-pre-line leading-relaxed">
             {post.content}
           </div>
         )}
@@ -99,6 +76,9 @@ export function Post({ post, onEdit }: PostProps) {
           </div>
         )}
       </CardContent>
+
+      <Divider />
+
       <CardFooter className="flex flex-col px-6 pt-2 pb-4">
         <div className="flex items-center justify-between w-full text-xs text-[#65676B] dark:text-[#B0B3B8] mb-1">
           <div className="flex items-center gap-1">
@@ -111,13 +91,13 @@ export function Post({ post, onEdit }: PostProps) {
             <span>{post.commentsCount} comments</span>
           </div>
         </div>
-        <div className="border-t border-[#e3e8f0] dark:border-[#2a2d34] my-2 w-full" />
+        <Divider />
         <div className="flex items-center justify-between w-full">
           <Button variant="ghost" className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946]">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="mx-auto mb-1"><path stroke="currentColor" strokeWidth="2" d="M7 12l5 5L22 7"/></svg>
             <span className="text-xs font-semibold">Like</span>
           </Button>
-          <Button variant="ghost" className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946] border-l border-r border-[#e3e8f0] dark:border-[#2a2d34]" onClick={() => setShowCommentModal(true)}>
+          <Button variant="ghost" className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946] border-l border-r border-[#e3e8f0] dark:border-[#2a2d34]" onClick={onOpenCommentModal}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="mx-auto mb-1"><path stroke="currentColor" strokeWidth="2" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10Z"/></svg>
             <span className="text-xs font-semibold">Comment</span>
           </Button>
@@ -127,60 +107,6 @@ export function Post({ post, onEdit }: PostProps) {
           </Button>
         </div>
       </CardFooter>
-      {/* Modal for comments */}
-      <Modal open={showCommentModal} onClose={() => setShowCommentModal(false)} widthClassName="max-w-2xl">
-        {/* Post content (no footer) */}
-        <div className="p-6 border-b border-[#e3e8f0] dark:border-[#2a2d34]">
-          <div className="flex flex-row items-center gap-4 mb-2">
-            <Avatar src={post.userAvatarUrl} alt={post.username || 'User'} size={48} />
-            <UserMeta username={post.username} createdAt={post.createdAt} />
-          </div>
-          {post.content && (
-            <div className="mb-4 text-lg text-[#232946] dark:text-[#E4E6EB] whitespace-pre-line leading-relaxed">
-              {post.content}
-            </div>
-          )}
-          {post.imageUrl && (
-            <div className="flex gap-3 mb-2">
-              {post.imageUrl.split(',').map((url, idx) => (
-                <img
-                  key={idx}
-                  src={url.trim()}
-                  alt="Post media"
-                  className="rounded-xl object-cover max-h-80 w-1/4 border border-[#e3e8f0] dark:border-[#2a2d34] shadow-sm"
-                  style={{ aspectRatio: '3/4' }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Comments list */}
-        <div className="p-6 overflow-y-auto max-h-[350px] border-b border-[#e3e8f0] dark:border-[#2a2d34]">
-          <CommentList comments={commentsData || []} loading={commentsLoading} />
-        </div>
-        {/* Comment input */}
-        <div className="p-6">
-          {currentUser && (
-            <CommentInput
-              value={commentText}
-              onChange={setCommentText}
-              onSubmit={handleAddComment}
-              loading={addCommentMutation.isPending}
-              error={(() => {
-                const err = addCommentMutation.error as unknown;
-                if (err && typeof err === 'object' && err !== null && 'response' in err) {
-                  // @ts-expect-error: error object may have response property from Axios or similar libraries
-                  return err.response?.data?.message || '';
-                }
-                if (err instanceof Error) return err.message;
-                return '';
-              })()}
-              avatarUrl={currentUser.avatarUrl}
-              username={currentUser.username}
-            />
-          )}
-        </div>
-      </Modal>
     </Card>
   );
 } 
