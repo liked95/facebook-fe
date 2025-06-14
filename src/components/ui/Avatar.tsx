@@ -1,4 +1,5 @@
 import React from 'react';
+import placeholderUserAvatar from '../../assets/images/placeholder_user_avatar.png';
 
 export interface AvatarProps {
   src?: string | null;
@@ -10,11 +11,11 @@ export interface AvatarProps {
 export function Avatar({ src, alt, size = 40, className = '' }: AvatarProps) {
   return (
     <img
-      src={src || '/avatar.png'}
+      src={src || placeholderUserAvatar}
       alt={alt || 'User'}
       width={size}
       height={size}
-      className={`rounded-full border border-[#DADDE1] dark:border-[#3A3B3C] object-cover ${className}`}
+      className={`rounded-full border-2 border-[#1877F2] shadow-md object-cover bg-[#F0F2F5] dark:bg-[#3A3B3C] ${className}`}
       style={{ width: size, height: size }}
     />
   );
