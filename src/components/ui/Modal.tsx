@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
+import { useKeyboardEvent } from '../../hooks/useKeyboardEvent';
 
 interface ModalProps {
   open: boolean;
@@ -7,15 +8,9 @@ interface ModalProps {
   widthClassName?: string;
 }
 
-export function Modal({ open, onClose, children, widthClassName = 'max-w-2xl' }: ModalProps) {
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
+export function Modal({ open, onClose, children, widthClassName = "max-w-xl" }: ModalProps) {
+  useScrollLock(open);
+  useKeyboardEvent('Escape', onClose, open);
 
   if (!open) return null;
 

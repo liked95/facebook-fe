@@ -1,7 +1,8 @@
+import { CommentResponseDto } from '@/types/api';
 import { Comment } from './Comment';
 
 export interface CommentListProps {
-  comments: any[];
+  comments: CommentResponseDto[];
   loading?: boolean;
   emptyMessage?: string;
 }
@@ -15,7 +16,7 @@ export function CommentList({ comments, loading, emptyMessage = 'No comments yet
   }
   return (
     <ul className="space-y-3">
-      {comments.map((comment) => (
+      {comments.map((comment: CommentResponseDto) => (
         <Comment key={comment.id} comment={comment} />
       ))}
     </ul>
