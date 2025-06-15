@@ -4,13 +4,14 @@ import { useAuthStore } from "../store/auth";
 import { Post } from "../components/post/Post";
 import { useState } from "react";
 import { Avatar } from "../components/ui/Avatar";
-import { CreateEditPostModal } from '../components/post/CreateEditPostModal';
-import { PostDetailModal } from '../components/modals/CommentModal';
+import { CreateEditPostModal } from "../components/post/CreateEditPostModal";
+import { PostDetailModal } from "../components/modals/CommentModal";
 import type { PostResponseDto } from "../types/api";
 
 export function Feed() {
   const currentUser = useAuthStore((state) => state.user);
-  const [commentModalPost, setCommentModalPost] = useState<PostResponseDto | null>(null);
+  const [commentModalPost, setCommentModalPost] =
+    useState<PostResponseDto | null>(null);
   const [commentText, setCommentText] = useState("");
   const queryClient = useQueryClient();
   const [showPostModal, setShowPostModal] = useState(false);
@@ -79,8 +80,18 @@ export function Feed() {
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Fake input to open create post modal */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 bg-white dark:bg-[#232946] rounded-xl shadow px-4 py-3 cursor-pointer border border-[#e3e8f0] dark:border-[#2a2d34]" onClick={() => { setEditPost(null); setShowPostModal(true); }}>
-            <Avatar src={currentUser.avatarUrl} alt={currentUser.username || 'User'} size={40} />
+          <div
+            className="flex items-center gap-3 bg-white dark:bg-[#232946] rounded-xl shadow px-4 py-3 cursor-pointer border border-[#e3e8f0] dark:border-[#2a2d34]"
+            onClick={() => {
+              setEditPost(null);
+              setShowPostModal(true);
+            }}
+          >
+            <Avatar
+              src={currentUser.avatarUrl}
+              alt={currentUser.username || "User"}
+              size={40}
+            />
             <div className="flex-1">
               <input
                 type="text"
@@ -91,6 +102,7 @@ export function Feed() {
             </div>
           </div>
         </div>
+        
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading posts...</p>
@@ -100,17 +112,27 @@ export function Feed() {
             <p className="text-muted-foreground">No posts yet</p>
           </div>
         ) : (
-          posts?.data.data.map((post) => <Post key={post.id} post={post} onOpenCommentModal={() => setCommentModalPost(post)} onEdit={() => { setEditPost(post); setShowPostModal(true); }} />)
+          posts?.data.data.map((post) => (
+            <Post
+              key={post.id}
+              post={post}
+              onOpenCommentModal={() => setCommentModalPost(post)}
+              onEdit={() => {
+                setEditPost(post);
+                setShowPostModal(true);
+              }}
+            />
+          ))
         )}
       </div>
-      
+
       <CreateEditPostModal
         open={showPostModal}
         onClose={() => setShowPostModal(false)}
         post={editPost}
         currentUser={currentUser}
       />
-      
+
       <PostDetailModal
         post={commentModalPost}
         onClose={() => setCommentModalPost(null)}
