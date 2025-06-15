@@ -10,6 +10,7 @@ import type { PostResponseDto } from "../../types/api";
 import { Divider } from "../ui/Divider";
 import { PencilIcon } from "../ui/icons/PencilIcon";
 import { TrashIcon } from "../ui/icons/TrashIcon";
+import { ConfirmModal } from "../modals/ConfirmModal";
 
 export interface PostProps {
   post: PostResponseDto;
@@ -20,6 +21,7 @@ export interface PostProps {
 export function Post({ post, onEdit, onOpenCommentModal }: PostProps) {
   const currentUser = useAuthStore((state) => state.user);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const queryClient = useQueryClient();
   const isOwner = currentUser?.id === post.userId;
 
@@ -33,10 +35,12 @@ export function Post({ post, onEdit, onOpenCommentModal }: PostProps) {
   });
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      setIsDeleting(true);
-      deleteMutation.mutate();
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    setIsDeleting(true);
+    deleteMutation.mutate();
   };
 
   return (
@@ -176,6 +180,16 @@ export function Post({ post, onEdit, onOpenCommentModal }: PostProps) {
           </Button>
         </div>
       </CardFooter>
+
+      <ConfirmModal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDelete}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </Card>
   );
 }

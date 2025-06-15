@@ -1,4 +1,4 @@
-import { Modal } from "../ui/Modal";
+import { Modal } from "./Modal";
 import { Avatar } from "../ui/Avatar";
 import { UserMeta } from "../ui/UserMeta";
 import { Button } from "../ui/Button";

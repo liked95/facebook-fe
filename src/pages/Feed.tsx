@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/auth";
 import { Post } from "../components/post/Post";
 import { useState } from "react";
 import { Avatar } from "../components/ui/Avatar";
-import { CreateEditPostModal } from "../components/post/CreateEditPostModal";
+import { CreateEditPostModal } from "../components/modals/CreateEditPostModal";
 import { PostDetailModal } from "../components/modals/CommentModal";
 import type { PostResponseDto } from "../types/api";
 

@@ -1,5 +1,5 @@
-import { Modal } from "../modals/Modal";
-import { CreatePost } from "./CreatePost";
+import { Modal } from "./Modal";
+import { CreatePost } from "../post/CreatePost";
 import type { PostResponseDto, UserResponseDto } from "../../types/api";
 
 interface CreateEditPostModalProps {
