@@ -11,6 +11,9 @@ import type {
   UpdateCommentDto,
   UpdatePostDto,
   UserResponseDto,
+  LikeActionResult,
+  PostLikeDto,
+  CommentLikeDto,
 } from '../types/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -30,6 +33,18 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Response interceptor for handling 401 unauthorized responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authApi = {
@@ -87,6 +102,25 @@ export const usersApi = {
 export const feedApi = {
   getFeed: (pageNumber = 1, pageSize = 25) =>
     api.get<ApiResponse<PostResponseDto[]>>(`/Api/Feed`, {
+      params: { pageNumber, pageSize },
+    }),
+};
+
+// Likes API
+export const likesApi = {
+  likePost: (postId: string) =>
+    api.post<LikeActionResult>(`/api/Likes/posts/${postId}`),
+  
+  getPostLikes: (postId: string, pageNumber = 1, pageSize = 25) =>
+    api.get<PostLikeDto[]>(`/api/Likes/posts/${postId}`, {
+      params: { pageNumber, pageSize },
+    }),
+  
+  likeComment: (commentId: string) =>
+    api.post<LikeActionResult>(`/api/Likes/comments/${commentId}`),
+  
+  getCommentLikes: (commentId: string, pageNumber = 1, pageSize = 25) =>
+    api.get<CommentLikeDto[]>(`/api/Likes/comments/${commentId}`, {
       params: { pageNumber, pageSize },
     }),
 };

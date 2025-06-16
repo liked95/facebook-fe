@@ -1,195 +1,142 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postsApi } from "../../lib/api";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 import { useAuthStore } from "../../store/auth";
-import { Card, CardContent, CardFooter, CardHeader } from "../ui/Card";
-import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Avatar";
-import { UserMeta } from "../ui/UserMeta";
+import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
+import { PostActions } from "./PostActions";
+import { PostImages } from "./PostImages";
+import { PostPrivacy } from "./PostPrivacy";
 import type { PostResponseDto } from "../../types/api";
-import { Divider } from "../ui/Divider";
-import { PencilIcon } from "../ui/icons/PencilIcon";
-import { TrashIcon } from "../ui/icons/TrashIcon";
-import { ConfirmModal } from "../modals/ConfirmModal";
+import { usePostMutations } from "../../hooks/mutations/usePostMutations";
+import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
 
-export interface PostProps {
+interface PostProps {
   post: PostResponseDto;
-  onEdit?: () => void;
-  onOpenCommentModal?: () => void;
+  onOpenCommentModal: () => void;
+  onEdit: () => void;
 }
 
-export function Post({ post, onEdit, onOpenCommentModal }: PostProps) {
+export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
   const currentUser = useAuthStore((state) => state.user);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const queryClient = useQueryClient();
-  const isOwner = currentUser?.id === post.userId;
-
-  const deleteMutation = useMutation({
-    mutationFn: () => postsApi.delete(post.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      setIsDeleting(false);
-    },
-    onError: () => setIsDeleting(false),
-  });
+  const [showActions, setShowActions] = useState(false);
+  const { deletePostMutation } = usePostMutations();
+  const { likePostMutation } = useLikeMutations();
 
   const handleDelete = () => {
-    setShowDeleteConfirm(true);
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      deletePostMutation.mutate(post.id);
+    }
   };
 
-  const confirmDelete = () => {
-    setIsDeleting(true);
-    deleteMutation.mutate();
+  const handleLike = () => {
+    likePostMutation.mutate(post.id);
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mt-6 border-1 border-[#DADDE1] dark:border-[#3E4042] bg-gradient-to-br from-[#f0f4ff] via-[#f8fbff] to-[#eaf0fa] dark:from-[#232946] dark:via-[#232946] dark:to-[#181823] rounded-2xl shadow-2xl">
-      <CardHeader className="flex flex-row items-center gap-4 p-6 pb-2 border-b border-[#e3e8f0] dark:border-[#2a2d34]">
-        <Avatar
-          src={post.userAvatarUrl}
-          alt={post.username || "User"}
-          size={48}
-        />
-        <UserMeta username={post.username} createdAt={post.createdAt} />
-        {isOwner && (
-          <div className="flex gap-2 ml-auto">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={onEdit}
-              title="Edit"
-              className="text-[#232946] hover:bg-[#eaf0fa] dark:hover:bg-[#232946] p-0 flex items-center justify-center rounded-full border-none"
-            >
-              <PencilIcon />
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              title="Delete"
-              className="text-[#232946] hover:bg-[#eaf0fa] dark:hover:bg-[#232946] p-0 flex items-center justify-center rounded-full border-none"
-            >
-              <TrashIcon />
-            </Button>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent className="px-6 py-4">
-        {post.content && (
-          <div className="text-lg text-[#232946] dark:text-[#E4E6EB] whitespace-pre-line leading-relaxed">
-            {post.content}
-          </div>
-        )}
-        {/* Images grid */}
-        {post.imageUrl && (
-          <div className="flex gap-3 mb-2">
-            {post.imageUrl.split(",").map((url, idx) => (
-              <img
-                key={idx}
-                src={url.trim()}
-                alt="Post media"
-                className="rounded-xl object-cover max-h-80 w-1/4 border border-[#e3e8f0] dark:border-[#2a2d34] shadow-sm"
-                style={{ aspectRatio: "3/4" }}
+    <div className="bg-white dark:bg-[#232946] rounded-xl shadow-sm border border-[#e3e8f0] dark:border-[#2a2d34] overflow-hidden">
+      {/* Post Header */}
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to={`/profile/${post.userId}`}>
+              <Avatar
+                src={post.userAvatarUrl}
+                alt={post.username || "User"}
+                size={40}
               />
-            ))}
-          </div>
-        )}
-      </CardContent>
-
-      <Divider />
-
-      <CardFooter className="flex flex-col px-6 pt-2 pb-1">
-        <div className="flex items-center justify-between w-full text-xs text-[#65676B] dark:text-[#B0B3B8] mb-1">
-          <div className="flex items-center gap-1">
-            <span className="inline-flex items-center gap-1">
-              <svg
-                width="16"
-                height="16"
-                fill="currentColor"
-                className="text-[#1877F2]"
-                viewBox="0 0 24 24"
+            </Link>
+            <div>
+              <Link
+                to={`/profile/${post.userId}`}
+                className="font-semibold hover:underline"
               >
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-              0
-            </span>
+                {post.username}
+              </Link>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <span>
+                  {formatDistanceToNow(new Date(post.createdAt), {
+                    addSuffix: true,
+                  })}
+                </span>
+                <span>•</span>
+                <PostPrivacy privacy={post.privacy} />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span>{post.commentsCount} comments</span>
+          {currentUser?.id === post.userId && (
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowActions(!showActions)}
+              >
+                <Icon name="more" className="h-5 w-5" />
+              </Button>
+              {showActions && (
+                <PostActions
+                  onEdit={onEdit}
+                  onDelete={handleDelete}
+                  onClose={() => setShowActions(false)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Post Content */}
+      <div className="px-4 pb-2">
+        <p className="whitespace-pre-wrap">{post.content}</p>
+      </div>
+
+      {/* Post Images */}
+      {post.imageUrl && (
+        <PostImages images={post.imageUrl.split(",")} />
+      )}
+
+      {/* Post Stats */}
+      <div className="px-4 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Icon name="heart" className="h-4 w-4 text-red-500" />
+            <span>{post.likesCount}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Icon name="message-circle" className="h-4 w-4" />
+            <span>{post.commentsCount}</span>
           </div>
         </div>
-        <Divider />
-        <div className="flex items-center justify-between w-full">
+      </div>
+
+      {/* Post Actions */}
+      <div className="px-4 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946]"
+            className="flex-1"
+            onClick={handleLike}
+            disabled={likePostMutation.isPending}
           >
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="mx-auto mb-1"
-            >
-              <path stroke="currentColor" strokeWidth="2" d="M7 12l5 5L22 7" />
-            </svg>
-            <span className="text-xs font-semibold">Like</span>
+            <Icon
+              name={post.isLikedByCurrentUser ? "heart" : "heart-outline"}
+              className={`h-5 w-5 ${
+                post.isLikedByCurrentUser ? "text-red-500" : ""
+              }`}
+            />
+            <span>Like</span>
           </Button>
           <Button
             variant="ghost"
-            className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946] border-l border-r border-[#e3e8f0] dark:border-[#2a2d34]"
+            className="flex-1"
             onClick={onOpenCommentModal}
           >
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="mx-auto mb-1"
-            >
-              <path
-                stroke="currentColor"
-                strokeWidth="2"
-                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10Z"
-              />
-            </svg>
-            <span className="text-xs font-semibold">Comment</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className="flex-1 flex flex-col items-center py-2 text-[#65676B] dark:text-[#B0B3B8] hover:bg-[#eaf0fa] dark:hover:bg-[#232946]"
-          >
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="mx-auto mb-1"
-            >
-              <path
-                stroke="currentColor"
-                strokeWidth="2"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-            <span className="text-xs font-semibold">Share</span>
+            <Icon name="message-circle" className="h-5 w-5" />
+            <span>Comment</span>
           </Button>
         </div>
-      </CardFooter>
-
-      <ConfirmModal
-        open={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={confirmDelete}
-        title="Delete Post"
-        description="Are you sure you want to delete this post? This action cannot be undone."
-        confirmText="Delete"
-        variant="danger"
-      />
-    </Card>
+      </div>
+    </div>
   );
 }

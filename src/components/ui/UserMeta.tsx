@@ -1,4 +1,5 @@
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistance } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export interface UserMetaProps {
   username: string | null;
@@ -8,6 +9,10 @@ export interface UserMetaProps {
 }
 
 export function UserMeta({ username, createdAt, meta, className = '' }: UserMetaProps) {
+  // Parse the ISO string directly without timezone conversion
+  const date = new Date(createdAt);
+  const nowUtc = toZonedTime(new Date(), 'UTC');
+  
   return (
     <div className={`min-w-0 ${className}`}>
       <div className="flex items-center gap-1 flex-wrap">
@@ -15,7 +20,7 @@ export function UserMeta({ username, createdAt, meta, className = '' }: UserMeta
         {meta}
       </div>
       <div className="flex items-center gap-1 text-xs text-[#8A8D91] dark:text-[#A3BCF9] mt-0.5 font-medium">
-        <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+        <span>{formatDistance(date, nowUtc, { addSuffix: true })}</span>
         <span>·</span>
         <span>🌐</span>
       </div>

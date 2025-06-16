@@ -1,65 +1,40 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { feedApi, commentsApi } from "../lib/api";
+import { useState } from "react";
 import { useAuthStore } from "../store/auth";
 import { Post } from "../components/post/Post";
-import { useState } from "react";
 import { Avatar } from "../components/ui/Avatar";
 import { CreateEditPostModal } from "../components/modals/CreateEditPostModal";
 import { PostDetailModal } from "../components/modals/CommentModal";
 import type { PostResponseDto } from "../types/api";
+import { useFeed } from "../hooks/queries/useFeed";
+import { useComments } from "../hooks/queries/useComments";
+import { useCommentMutations } from "../hooks/mutations/useCommentMutations";
 
 export function Feed() {
   const currentUser = useAuthStore((state) => state.user);
   const [commentModalPost, setCommentModalPost] =
     useState<PostResponseDto | null>(null);
   const [commentText, setCommentText] = useState("");
-  const queryClient = useQueryClient();
   const [showPostModal, setShowPostModal] = useState(false);
   const [editPost, setEditPost] = useState<PostResponseDto | null>(null);
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["feed", currentUser?.id],
-    queryFn: () => feedApi.getFeed(),
-    enabled: !!currentUser,
-  });
-
-  // Modal comment logic
-  const { data: commentsData, isLoading: commentsLoading } = useQuery({
-    queryKey: ["comments", commentModalPost?.id],
-    queryFn: () =>
-      commentModalPost
-        ? commentsApi
-            .getByPost(commentModalPost.id)
-            .then((res) => res.data.data)
-        : [],
-    enabled: !!commentModalPost,
-  });
-
-  const addCommentMutation = useMutation({
-    mutationFn: (content: string) =>
-      commentModalPost
-        ? commentsApi.create(commentModalPost.id, { content })
-        : Promise.resolve(),
-    onSuccess: () => {
-      setCommentText("");
-      if (commentModalPost) {
-        queryClient.invalidateQueries({
-          queryKey: ["comments", commentModalPost.id],
-        });
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
-      }
-    },
-  });
+  const { data: posts, isLoading } = useFeed(currentUser?.id);
+  const { data: commentsData, isLoading: commentsLoading } = useComments(commentModalPost?.id);
+  const { createCommentMutation } = useCommentMutations();
 
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim() || !commentModalPost) return;
-    addCommentMutation.mutate(commentText.trim());
+    createCommentMutation.mutate({
+      postId: commentModalPost.id,
+      data: { content: commentText.trim() },
+    });
+    setCommentText("");
   };
 
   const handleAddCommentError = (err: unknown) => {
     if (err && typeof err === "object" && err !== null && "response" in err) {
-      return (err as any).response?.data?.message || "";
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      return errorResponse.response?.data?.message || "";
     }
     if (err instanceof Error) return err.message;
     return "";
@@ -102,7 +77,7 @@ export function Feed() {
             </div>
           </div>
         </div>
-        
+
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading posts...</p>
@@ -142,8 +117,8 @@ export function Feed() {
         commentText={commentText}
         onCommentTextChange={setCommentText}
         onAddComment={handleAddComment}
-        addCommentLoading={addCommentMutation.isPending}
-        addCommentError={handleAddCommentError(addCommentMutation.error)}
+        addCommentLoading={createCommentMutation.isPending}
+        addCommentError={handleAddCommentError(createCommentMutation.error)}
       />
     </div>
   );

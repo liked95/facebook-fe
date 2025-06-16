@@ -28,6 +28,8 @@ export interface PostResponseDto {
   videoUrl: string | null;
   fileUrl: string | null;
   commentsCount: number;
+  likesCount: number;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface CommentResponseDto {
@@ -40,6 +42,8 @@ export interface CommentResponseDto {
   username: string | null;
   userAvatarUrl: string | null;
   postId: string;
+  likesCount: number;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface PaginationMeta {
@@ -93,4 +97,26 @@ export interface CreateCommentDto {
 
 export interface UpdateCommentDto {
   content?: string;
+}
+
+export interface LikeActionResult {
+  isLiked: boolean;
+  totalLikes: number;
+  message: string | null;
+}
+
+export interface PostLikeDto {
+  id: string;
+  userId: string;
+  username: string | null;
+  userAvatarUrl: string | null;
+  createdAt: string;
+}
+
+export interface CommentLikeDto {
+  id: string;
+  userId: string;
+  username: string | null;
+  userAvatarUrl: string | null;
+  createdAt: string;
 } 
