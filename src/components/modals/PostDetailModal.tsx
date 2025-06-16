@@ -74,6 +74,7 @@ export function PostDetailModal({
           <CommentList
             comments={commentsData}
             loading={commentsLoading}
+            postId={post.id}
           />
         </div>
 

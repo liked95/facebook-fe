@@ -1,19 +1,36 @@
-import { Avatar } from "../ui/Avatar";
-import { UserMeta } from "../ui/UserMeta";
-import { Button } from "../ui/Button";
+import { useState } from "react";
+import { Comment } from "./Comment";
 import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
+import { useCommentMutations } from "../../hooks/mutations/useCommentMutations";
+import { ConfirmModal } from "../modals/ConfirmModal";
 import type { CommentResponseDto } from "../../types/api";
+import { useAuthStore } from "@/store/auth";
 
 interface CommentListProps {
   comments: CommentResponseDto[];
   loading: boolean;
+  postId: string;
 }
 
-export function CommentList({ comments, loading }: CommentListProps) {
+export function CommentList({ comments, loading, postId }: CommentListProps) {
+  const currentUser = useAuthStore((state) => state.user);
   const { likeCommentMutation } = useLikeMutations();
+  const { deleteCommentMutation } = useCommentMutations();
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
   const handleLikeComment = (commentId: string) => {
     likeCommentMutation.mutate(commentId);
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setCommentToDelete(commentId);
+  };
+
+  const handleConfirmDelete = () => {
+    if (commentToDelete) {
+      deleteCommentMutation.mutate({ postId, commentId: commentToDelete });
+      setCommentToDelete(null);
+    }
   };
 
   if (loading) {
@@ -33,41 +50,31 @@ export function CommentList({ comments, loading }: CommentListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {comments.map((comment) => (
-        <div key={comment.id} className="flex gap-3">
-          <Avatar
-            src={comment.userAvatarUrl}
-            alt={comment.username || "User"}
-            size={32}
+    <>
+      <ul className="space-y-4">
+        {comments.map((comment) => (
+          <Comment
+            key={comment.id}
+            comment={comment}
+            onLike={handleLikeComment}
+            isLiking={likeCommentMutation.isPending}
+            onDelete={handleDeleteComment}
+            isDeleting={deleteCommentMutation.isPending}
+            currentUser={currentUser}
           />
-          <div className="flex-1">
-            <div className="bg-[#F0F2F5] dark:bg-[#3A3B3C] rounded-2xl px-3 py-2">
-              <UserMeta
-                username={comment.username}
-                createdAt={comment.createdAt}
-                className="text-xs"
-              />
-              <p className="text-[#232946] dark:text-[#E4E6EB] mt-1">
-                {comment.content}
-              </p>
-            </div>
-            <div className="flex items-center gap-4 mt-1 px-2">
-              <Button
-                variant="ghost"
-                className={`text-xs text-[#65676B] dark:text-[#B0B3B8] hover:bg-transparent hover:text-[#1877F2] dark:hover:text-[#1877F2] ${comment.isLikedByCurrentUser ? 'text-[#1877F2]' : ''}`}
-                onClick={() => handleLikeComment(comment.id)}
-                disabled={likeCommentMutation.isPending}
-              >
-                Like
-              </Button>
-              <span className="text-xs text-[#65676B] dark:text-[#B0B3B8]">
-                {comment.likesCount} likes
-              </span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </ul>
+
+      <ConfirmModal
+        open={!!commentToDelete}
+        onClose={() => setCommentToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+    </>
   );
 } 
