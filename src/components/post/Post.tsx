@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistance } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { useAuthStore } from "../../store/auth";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
@@ -32,6 +33,10 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { deletePostMutation } = usePostMutations();
   const { likePostMutation } = useLikeMutations();
+
+   // Parse the ISO string directly without timezone conversion
+   const date = new Date(post.createdAt);
+   const nowUtc = toZonedTime(new Date(), 'UTC');
 
   const handleTriggerDeleteConfirmationModal = () => {
     setShowDeleteConfirm(true);
@@ -68,9 +73,7 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
                 </Link>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <span>
-                    {formatDistanceToNow(new Date(post.createdAt), {
-                      addSuffix: true,
-                    })}
+                    {formatDistance(date, nowUtc, { addSuffix: true })}
                   </span>
                   <span>•</span>
                   <PostPrivacy privacy={post.privacy} />

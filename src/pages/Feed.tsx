@@ -51,7 +51,7 @@ export function Feed() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-gradient-to-br from-[#eaf0fa] via-[#f8fbff] to-[#f0f4ff] dark:from-[#181823] dark:via-[#232946] dark:to-[#232946] py-10 px-2">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-[#F0F2F5] dark:bg-[#18191A] py-10 px-2">
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Fake input to open create post modal */}
         <div className="mb-6">
