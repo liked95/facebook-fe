@@ -1,6 +1,8 @@
 import { Button } from "../ui/Button";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useRef } from "react";
+import { useClickOutside } from "../../hooks/useClickOutside";
 
 interface PostActionsProps {
   onEdit: () => void;
@@ -9,8 +11,15 @@ interface PostActionsProps {
 }
 
 export function PostActions({ onEdit, onDelete, onClose }: PostActionsProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useClickOutside(ref, onClose);
+
   return (
-    <div className="absolute right-0 top-full mt-1 rounded-md bg-white dark:bg-[#242526] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+    <div
+      ref={ref}
+      className="absolute right-0 top-full mt-1 rounded-md bg-white dark:bg-[#242526] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+    >
       <div className="py-1">
         <Button
           variant="ghost"
@@ -27,7 +36,7 @@ export function PostActions({ onEdit, onDelete, onClose }: PostActionsProps) {
         </Button>
         <Button
           variant="ghost"
-          className="w-full justify-start px-4 py-2 text-sm text-red-500 hover:text-red-600"
+          className="w-full justify-start px-4 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
           onClick={() => {
             onDelete();
             onClose();

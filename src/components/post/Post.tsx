@@ -78,7 +78,7 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowActions(!showActions)}
-                className="hover:bg-gray-100 dark:hover:bg-[#2a2d34]"
+                className="rounded-full hover:bg-gray-100 dark:hover:bg-[#2a2d34]"
               >
                 <EllipsisHorizontalIcon className="size-5" />
               </Button>
