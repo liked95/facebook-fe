@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../../lib/api';
 import { useAuthStore } from '../../store/auth';
+import { useAuthMutations } from '../../hooks/mutations/useAuthMutations';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/Card';
+import type { ApiError } from '../../types/api';
 
 export function Login() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const { loginMutation } = useAuthMutations();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,23 +18,21 @@ export function Login() {
 
   const [errorMessage, setErrorMessage] = useState('');
 
-  const loginMutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (response) => {
-      if (response.data.success && response.data.data.token) {
-        setAuth(response.data.data.user, response.data.data.token);
-        navigate('/');
-      }
-    },
-    onError: (error) => {
-      console.error(error);
-      setErrorMessage(error?.response?.data?.message || 'Something went wrong');
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate(formData);
+    loginMutation.mutate(formData, {
+      onSuccess: (response) => {
+        if (response.data.success && response.data.data.token) {
+          setAuth(response.data.data.user, response.data.data.token);
+          navigate('/');
+        }
+      },
+      onError: (error: Error) => {
+        console.error(error);
+        const apiError = error as unknown as ApiError;
+        setErrorMessage(apiError?.response?.data?.message || 'Something went wrong');
+      },
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

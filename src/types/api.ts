@@ -119,4 +119,12 @@ export interface CommentLikeDto {
   username: string | null;
   userAvatarUrl: string | null;
   createdAt: string;
+}
+
+export interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
 } 

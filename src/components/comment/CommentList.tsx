@@ -1,8 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { likesApi } from "../../lib/api";
 import { Avatar } from "../ui/Avatar";
 import { UserMeta } from "../ui/UserMeta";
 import { Button } from "../ui/Button";
+import { useCommentMutations } from "../../hooks/mutations/useCommentMutations";
 import type { CommentResponseDto } from "../../types/api";
 
 interface CommentListProps {
@@ -11,14 +10,7 @@ interface CommentListProps {
 }
 
 export function CommentList({ comments, loading }: CommentListProps) {
-  const queryClient = useQueryClient();
-
-  const likeCommentMutation = useMutation({
-    mutationFn: (commentId: string) => likesApi.likeComment(commentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments"] });
-    },
-  });
+  const { likeCommentMutation } = useCommentMutations();
 
   const handleLikeComment = (commentId: string) => {
     likeCommentMutation.mutate(commentId);

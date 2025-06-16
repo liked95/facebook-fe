@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commentsApi } from "../../lib/api";
 import type { CreateCommentDto, UpdateCommentDto } from "../../types/api";
+import { likesApi } from '../../lib/api';
 
 export function useCommentMutations() {
   const queryClient = useQueryClient();
@@ -43,9 +44,17 @@ export function useCommentMutations() {
     },
   });
 
+  const likeCommentMutation = useMutation({
+    mutationFn: (commentId: string) => likesApi.likeComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
+    },
+  });
+
   return {
     createCommentMutation,
     updateCommentMutation,
     deleteCommentMutation,
+    likeCommentMutation,
   };
 } 

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Textarea } from '../ui/Textarea';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsApi } from '../../lib/api';
 import { Avatar } from '../ui/Avatar';
+import { usePostMutations } from '../../hooks/mutations/usePostMutations';
 import type { PostResponseDto, PrivacyType, UserResponseDto } from '../../types/api';
 
 export interface CreatePostProps {
@@ -16,7 +15,7 @@ export function CreatePost({ post, onClose, currentUser }: CreatePostProps) {
   const isEdit = !!post;
   const [content, setContent] = useState(post?.content || '');
   const [privacy, setPrivacy] = useState<PrivacyType>(post?.privacy ?? 0);
-  const queryClient = useQueryClient();
+  const { createPostMutation, updatePostMutation } = usePostMutations();
 
   useEffect(() => {
     if (isEdit) {
@@ -28,22 +27,23 @@ export function CreatePost({ post, onClose, currentUser }: CreatePostProps) {
     }
   }, [isEdit, post]);
 
-  const mutation = useMutation({
-    mutationFn: (data: { content: string; privacy: PrivacyType }) =>
-      isEdit && post ? postsApi.update(post.id, data) : postsApi.create(data),
-    onSuccess: () => {
-      setContent('');
-      setPrivacy(0);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      onClose();
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
-    mutation.mutate({ content: content.trim(), privacy });
+    
+    const data = { content: content.trim(), privacy };
+    if (isEdit && post) {
+      updatePostMutation.mutate({ postId: post.id, data });
+    } else {
+      createPostMutation.mutate(data);
+    }
+    
+    setContent('');
+    setPrivacy(0);
+    onClose();
   };
+
+  const isPending = createPostMutation.isPending || updatePostMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
@@ -73,8 +73,8 @@ export function CreatePost({ post, onClose, currentUser }: CreatePostProps) {
       </div>
       <div className="flex justify-end gap-2 px-6 pb-6">
         <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={mutation.isPending || !content.trim()}>
-          {mutation.isPending ? (isEdit ? 'Saving...' : 'Posting...') : isEdit ? 'Save' : 'Post'}
+        <Button type="submit" disabled={isPending || !content.trim()}>
+          {isPending ? (isEdit ? 'Saving...' : 'Posting...') : isEdit ? 'Save' : 'Post'}
         </Button>
       </div>
     </form>
