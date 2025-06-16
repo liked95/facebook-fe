@@ -56,8 +56,8 @@ export function PostDetailModal({
         </div>
 
         {/* Post Content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="mb-4">
+        <div className="flex-1 overflow-y-auto p-4 ">
+          <div className="mb-4 pb-4 border-b border-[#e3e8f0] dark:border-[#2a2d34]">
             <p className="text-lg whitespace-pre-wrap">{post.content}</p>
             {post.imageUrl && (
               <div className="mt-4">

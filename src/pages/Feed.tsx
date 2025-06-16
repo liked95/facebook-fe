@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/auth";
 import { Post } from "../components/post/Post";
 import { Avatar } from "../components/ui/Avatar";
 import { CreateEditPostModal } from "../components/modals/CreateEditPostModal";
-import { PostDetailModal } from "../components/modals/CommentModal";
+import { PostDetailModal } from "../components/modals/PostDetailModal";
 import type { PostResponseDto } from "../types/api";
 import { useFeed } from "../hooks/queries/useFeed";
 import { useComments } from "../hooks/queries/useComments";
