@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuthStore } from "../store/auth";
 import { Post } from "../components/post/Post";
 import { Avatar } from "../components/ui/Avatar";
@@ -40,6 +40,36 @@ export function Feed() {
     return "";
   };
 
+  const postListContent = useMemo(() => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center py-8">
+          <p className="text-muted-foreground">Loading posts...</p>
+        </div>
+      );
+    }
+
+    if (posts?.data.data.length === 0) {
+      return (
+        <div className="flex justify-center py-8">
+          <p className="text-muted-foreground">No posts yet</p>
+        </div>
+      );
+    }
+
+    return posts?.data.data.map((post) => (
+      <Post
+        key={post.id}
+        post={post}
+        onOpenCommentModal={() => setCommentModalPost(post)}
+        onEdit={() => {
+          setEditPost(post);
+          setShowPostModal(true);
+        }}
+      />
+    ));
+  }, [isLoading, posts?.data.data]);
+
   if (!currentUser) {
     return (
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
@@ -51,54 +81,36 @@ export function Feed() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#F0F2F5] dark:bg-[#18191A] py-10 px-2">
-      <div className="mx-auto max-w-2xl space-y-6">
-        {/* Fake input to open create post modal */}
-        <div className="mb-6">
-          <div
-            className="flex items-center gap-3 bg-white dark:bg-[#232946] rounded-xl shadow px-4 py-3 cursor-pointer border border-[#e3e8f0] dark:border-[#2a2d34]"
-            onClick={() => {
-              setEditPost(null);
-              setShowPostModal(true);
-            }}
-          >
-            <Avatar
-              src={currentUser.avatarUrl}
-              alt={currentUser.username || "User"}
-              size={40}
-            />
-            <div className="flex-1">
-              <input
-                type="text"
-                className="w-full bg-transparent outline-none text-[#65676B] dark:text-[#B0B3B8] placeholder-[#65676B] dark:placeholder-[#B0B3B8] cursor-pointer"
-                placeholder={`What's on your mind, ${currentUser.username}?`}
-                readOnly
-              />
-            </div>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <p className="text-muted-foreground">Loading posts...</p>
-          </div>
-        ) : posts?.data.data.length === 0 ? (
-          <div className="flex justify-center py-8">
-            <p className="text-muted-foreground">No posts yet</p>
-          </div>
-        ) : (
-          posts?.data.data.map((post) => (
-            <Post
-              key={post.id}
-              post={post}
-              onOpenCommentModal={() => setCommentModalPost(post)}
-              onEdit={() => {
-                setEditPost(post);
+    <>
+      <div className="min-h-[calc(100vh-3.5rem)] bg-[#F0F2F5] dark:bg-[#18191A] py-10 px-2">
+        <div className="mx-auto max-w-2xl space-y-6">
+          {/* Fake input to open create post modal */}
+          <div className="mb-6">
+            <div
+              className="flex items-center gap-3 bg-white dark:bg-[#232946] rounded-xl shadow px-4 py-3 cursor-pointer border border-[#e3e8f0] dark:border-[#2a2d34]"
+              onClick={() => {
+                setEditPost(null);
                 setShowPostModal(true);
               }}
-            />
-          ))
-        )}
+            >
+              <Avatar
+                src={currentUser.avatarUrl}
+                alt={currentUser.username || "User"}
+                size={40}
+              />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none text-[#65676B] dark:text-[#B0B3B8] placeholder-[#65676B] dark:placeholder-[#B0B3B8] cursor-pointer"
+                  placeholder={`What's on your mind, ${currentUser.username}?`}
+                  readOnly
+                />
+              </div>
+            </div>
+          </div>
+
+          {postListContent}
+        </div>
       </div>
 
       <CreateEditPostModal
@@ -120,6 +132,6 @@ export function Feed() {
         addCommentLoading={createCommentMutation.isPending}
         addCommentError={handleAddCommentError(createCommentMutation.error)}
       />
-    </div>
+    </>
   );
 }
