@@ -8,7 +8,6 @@ export function usePostMutations() {
   const createPostMutation = useMutation({
     mutationFn: (data: CreatePostDto) => postsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
@@ -17,7 +16,6 @@ export function usePostMutations() {
     mutationFn: ({ postId, data }: { postId: string; data: UpdatePostDto }) =>
       postsApi.update(postId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
@@ -25,7 +23,6 @@ export function usePostMutations() {
   const deletePostMutation = useMutation({
     mutationFn: (postId: string) => postsApi.delete(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });

@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commentsApi } from "../../lib/api";
 import type { CreateCommentDto, UpdateCommentDto } from "../../types/api";
-import { likesApi } from '../../lib/api';
 
 export function useCommentMutations() {
   const queryClient = useQueryClient();
@@ -11,7 +10,7 @@ export function useCommentMutations() {
       commentsApi.create(postId, data),
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
 
@@ -27,6 +26,8 @@ export function useCommentMutations() {
     }) => commentsApi.update(postId, commentId, data),
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+
     },
   });
 
@@ -40,21 +41,14 @@ export function useCommentMutations() {
     }) => commentsApi.delete(postId, commentId),
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-  });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
 
-  const likeCommentMutation = useMutation({
-    mutationFn: (commentId: string) => likesApi.likeComment(commentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
   });
 
   return {
     createCommentMutation,
     updateCommentMutation,
-    deleteCommentMutation,
-    likeCommentMutation,
+    deleteCommentMutation
   };
 } 

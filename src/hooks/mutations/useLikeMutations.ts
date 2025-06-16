@@ -7,7 +7,7 @@ export function useLikeMutations() {
   const likePostMutation = useMutation({
     mutationFn: (postId: string) => likesApi.likePost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
 

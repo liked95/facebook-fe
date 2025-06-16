@@ -1,7 +1,7 @@
 import { Avatar } from "../ui/Avatar";
 import { UserMeta } from "../ui/UserMeta";
 import { Button } from "../ui/Button";
-import { useCommentMutations } from "../../hooks/mutations/useCommentMutations";
+import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
 import type { CommentResponseDto } from "../../types/api";
 
 interface CommentListProps {
@@ -10,7 +10,7 @@ interface CommentListProps {
 }
 
 export function CommentList({ comments, loading }: CommentListProps) {
-  const { likeCommentMutation } = useCommentMutations();
+  const { likeCommentMutation } = useLikeMutations();
 
   const handleLikeComment = (commentId: string) => {
     likeCommentMutation.mutate(commentId);
