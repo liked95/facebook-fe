@@ -4,13 +4,20 @@ import { formatDistanceToNow } from "date-fns";
 import { useAuthStore } from "../../store/auth";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
-import { Icon } from "../ui/Icon";
+
 import { PostActions } from "./PostActions";
 import { PostImages } from "./PostImages";
 import { PostPrivacy } from "./PostPrivacy";
 import type { PostResponseDto } from "../../types/api";
 import { usePostMutations } from "../../hooks/mutations/usePostMutations";
 import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
+
+import {
+  ArrowPathIcon,
+  EllipsisHorizontalIcon,
+  HandThumbUpIcon,
+} from "@heroicons/react/24/outline";
+import { ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
 
 interface PostProps {
   post: PostResponseDto;
@@ -71,8 +78,9 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowActions(!showActions)}
+                className="hover:bg-gray-100 dark:hover:bg-[#2a2d34]"
               >
-                <Icon name="more" className="h-5 w-5" />
+                <EllipsisHorizontalIcon className="size-5" />
               </Button>
               {showActions && (
                 <PostActions
@@ -92,48 +100,55 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
       </div>
 
       {/* Post Images */}
-      {post.imageUrl && (
-        <PostImages images={post.imageUrl.split(",")} />
-      )}
+      {post.imageUrl && <PostImages images={post.imageUrl.split(",")} />}
 
       {/* Post Stats */}
       <div className="px-4 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
-            <Icon name="heart" className="h-4 w-4 text-red-500" />
+            <HandThumbUpIcon className="size-5" />
             <span>{post.likesCount}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Icon name="message-circle" className="h-4 w-4" />
+            <ChatBubbleOvalLeftIcon className="size-5" />
             <span>{post.commentsCount}</span>
           </div>
         </div>
       </div>
 
       {/* Post Actions */}
-      <div className="px-4 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
+      <div className="px-2 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            className="flex-1"
+            className={`flex-1 flex justify-center text-sm items-center gap-2 ${
+              post.isLikedByCurrentUser ? "text-[#1877F2]" : ""
+            }`}
             onClick={handleLike}
             disabled={likePostMutation.isPending}
           >
-            <Icon
-              name={post.isLikedByCurrentUser ? "heart" : "heart-outline"}
-              className={`h-5 w-5 ${
-                post.isLikedByCurrentUser ? "text-red-500" : ""
-              }`}
-            />
+            {post.isLikedByCurrentUser ? (
+              <div className="text-[#1877F2]">
+                <HandThumbUpIcon className="size-5" />
+              </div>
+            ) : (
+              <HandThumbUpIcon className="size-5" />
+            )}
             <span>Like</span>
           </Button>
           <Button
             variant="ghost"
-            className="flex-1"
+            className="flex-1 flex justify-center text-sm items-center gap-2"
             onClick={onOpenCommentModal}
           >
-            <Icon name="message-circle" className="h-5 w-5" />
+            <ChatBubbleOvalLeftIcon className="size-5" />
+
             <span>Comment</span>
+          </Button>
+
+          <Button variant="ghost" className="flex-1 flex justify-center text-sm items-center gap-2">
+            <ArrowPathIcon className="size-5" />
+            <span>Share</span>
           </Button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Button } from "../ui/Button";
-import { Icon } from "../ui/Icon";
+import { PencilIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface PostActionsProps {
   onEdit: () => void;
@@ -9,8 +10,8 @@ interface PostActionsProps {
 
 export function PostActions({ onEdit, onDelete, onClose }: PostActionsProps) {
   return (
-    <div className="absolute right-0 top-full mt-1 w-48 rounded-md bg-white dark:bg-[#232946] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-      <div className="py-1" role="menu" aria-orientation="vertical">
+    <div className="absolute right-0 top-full mt-1 rounded-md bg-white dark:bg-[#242526] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+      <div className="py-1">
         <Button
           variant="ghost"
           className="w-full justify-start px-4 py-2 text-sm"
@@ -19,8 +20,10 @@ export function PostActions({ onEdit, onDelete, onClose }: PostActionsProps) {
             onClose();
           }}
         >
-          <Icon name="edit" className="mr-2 h-4 w-4" />
-          Edit
+          <div className="flex items-center gap-2">
+            <PencilIcon className="size-4" />
+            <span>Edit</span>
+          </div>
         </Button>
         <Button
           variant="ghost"
@@ -30,10 +33,12 @@ export function PostActions({ onEdit, onDelete, onClose }: PostActionsProps) {
             onClose();
           }}
         >
-          <Icon name="trash" className="mr-2 h-4 w-4" />
-          Delete
+          <div className="flex items-center gap-2">
+            <TrashIcon className="size-4" />
+            <span>Delete</span>
+          </div>
         </Button>
       </div>
     </div>
   );
-} 
+}
