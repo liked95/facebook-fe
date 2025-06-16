@@ -48,7 +48,7 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <main className="container max-w-full pt-14 pb-6">
+      <main className="container max-w-full pt-14">
         <Outlet />
       </main>
     </div>
