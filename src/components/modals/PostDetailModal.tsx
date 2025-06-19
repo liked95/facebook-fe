@@ -4,13 +4,14 @@ import { UserMeta } from "../ui/UserMeta";
 import { CommentList } from "../comment/CommentList";
 import { CommentInput } from "../comment/CommentInput";
 import placeholderUserAvatar from "../../assets/images/placeholder_user_avatar.png";
-import type { PostResponseDto, UserResponseDto, CommentResponseDto } from "../../types/api";
+import type { PostResponseDto, UserResponseDto } from "../../types/api";
+import type { NestedCommentResponseDto } from "../../types/comment";
 
 interface PostDetailModalProps {
   post: PostResponseDto | null;
   onClose: () => void;
   currentUser: UserResponseDto;
-  commentsData: CommentResponseDto[];
+  commentsData: NestedCommentResponseDto[];
   commentsLoading: boolean;
   commentText: string;
   onCommentTextChange: (text: string) => void;

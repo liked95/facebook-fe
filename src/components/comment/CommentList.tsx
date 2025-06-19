@@ -3,11 +3,12 @@ import { Comment } from "./Comment";
 import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
 import { useCommentMutations } from "../../hooks/mutations/useCommentMutations";
 import { ConfirmModal } from "../modals/ConfirmModal";
-import type { CommentResponseDto } from "../../types/api";
 import { useAuthStore } from "@/store/auth";
+import type { NestedCommentResponseDto } from "@/types/comment";
+import type { CreateNestedCommentDto } from "@/types/comment";
 
 interface CommentListProps {
-  comments: CommentResponseDto[];
+  comments: NestedCommentResponseDto[];
   loading: boolean;
   postId: string;
 }
@@ -15,8 +16,10 @@ interface CommentListProps {
 export function CommentList({ comments, loading, postId }: CommentListProps) {
   const currentUser = useAuthStore((state) => state.user);
   const { likeCommentMutation } = useLikeMutations();
-  const { deleteCommentMutation } = useCommentMutations();
+  const { deleteCommentMutation, createCommentMutation } = useCommentMutations();
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+
+  if (!currentUser) return null;
 
   const handleLikeComment = (commentId: string) => {
     likeCommentMutation.mutate(commentId);
@@ -31,6 +34,17 @@ export function CommentList({ comments, loading, postId }: CommentListProps) {
       deleteCommentMutation.mutate({ postId, commentId: commentToDelete });
       setCommentToDelete(null);
     }
+  };
+
+  const handleReplyComment = (parentId: string, content: string) => {
+    const data: CreateNestedCommentDto = {
+      content,
+      parentId
+    };
+    createCommentMutation.mutate({
+      postId,
+      data
+    });
   };
 
   if (loading) {
@@ -61,6 +75,8 @@ export function CommentList({ comments, loading, postId }: CommentListProps) {
             onDelete={handleDeleteComment}
             isDeleting={deleteCommentMutation.isPending}
             currentUser={currentUser}
+            onReply={handleReplyComment}
+            isReplying={createCommentMutation.isPending}
           />
         ))}
       </ul>

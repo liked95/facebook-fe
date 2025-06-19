@@ -1,4 +1,3 @@
-import React from 'react';
 import placeholderUserAvatar from '../../assets/images/placeholder_user_avatar.png';
 
 export interface AvatarProps {
