@@ -16,7 +16,7 @@ export function UserMeta({ username, createdAt, meta, className = '' }: UserMeta
   return (
     <div className={`min-w-0 ${className}`}>
       <div className="flex items-center gap-1 flex-wrap">
-        <span className="font-bold text-base text-[#232946] dark:text-[#E4E6EB] truncate">{username}</span>
+        <span className="text-[13px] font-bold text-base text-[#232946] dark:text-[#E4E6EB] truncate">{username}</span>
         {meta}
       </div>
       <div className="flex items-center gap-1 text-xs text-[#8A8D91] dark:text-[#A3BCF9] mt-0.5 font-medium">

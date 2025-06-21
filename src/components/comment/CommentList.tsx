@@ -78,6 +78,7 @@ export function CommentList({ comments, loading, postId }: CommentListProps) {
             onReply={handleReplyComment}
             isReplying={createCommentMutation.isPending}
             postId={postId}
+            isLeaf={comment.replyCount === 0}
           />
         ))}
       </ul>
