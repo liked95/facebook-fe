@@ -11,6 +11,26 @@ import { Register } from "./pages/auth/Register";
 
 const queryClient = new QueryClient();
 
+// Define protected routes array
+const protectedRoutes = [
+  {
+    path: "/",
+    element: <Feed />,
+  }
+];
+
+// Define public routes array
+const publicRoutes = [
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  }
+];
+
 function AppRoutes() {
   useAuthCheck();
 
@@ -18,59 +38,23 @@ function AppRoutes() {
     <Routes>
       {/* Protected Routes - Require authentication */}
       <Route element={<Layout />}>
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-              <Feed />
-            </ProtectedRoute>
-          } 
-        />
-        {/* Add more protected routes here:
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/settings" 
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } 
-        /> */}
+        {protectedRoutes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={<ProtectedRoute>{route.element}</ProtectedRoute>}
+          />
+        ))}
       </Route>
       
       {/* Public Routes - Redirect authenticated users away */}
-      <Route 
-        path="/login" 
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } 
-      />
-      <Route 
-        path="/register" 
-        element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } 
-      />
-      {/* Add more public routes here:
-      <Route 
-        path="/about" 
-        element={
-          <PublicRoute>
-            <About />
-          </PublicRoute>
-        } 
-      /> */}
+      {publicRoutes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={<PublicRoute>{route.element}</PublicRoute>}
+        />
+      ))}
     </Routes>
   );
 }
