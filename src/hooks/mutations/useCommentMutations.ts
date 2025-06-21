@@ -8,9 +8,16 @@ export function useCommentMutations() {
   const createCommentMutation = useMutation({
     mutationFn: ({ postId, data }: { postId: string; data: CreateCommentDto }) =>
       commentsApi.create(postId, data),
-    onSuccess: (_, { postId }) => {
+    onSuccess: (_, { postId, data }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      
+      // If this is a reply, invalidate the replies for the parent comment
+      if (data.parentCommentId) {
+        queryClient.invalidateQueries({ 
+          queryKey: ["replies", postId, data.parentCommentId] 
+        });
+      }
     },
   });
 
@@ -27,7 +34,11 @@ export function useCommentMutations() {
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
-
+      
+      // Invalidate all replies queries for this post
+      queryClient.invalidateQueries({ 
+        queryKey: ["replies", postId] 
+      });
     },
   });
 
@@ -42,7 +53,11 @@ export function useCommentMutations() {
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
-
+      
+      // Invalidate all replies queries for this post
+      queryClient.invalidateQueries({ 
+        queryKey: ["replies", postId] 
+      });
     },
   });
 

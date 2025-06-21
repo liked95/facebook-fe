@@ -4,11 +4,11 @@ import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
 import { useCommentMutations } from "../../hooks/mutations/useCommentMutations";
 import { ConfirmModal } from "../modals/ConfirmModal";
 import { useAuthStore } from "@/store/auth";
-import type { NestedCommentResponseDto } from "@/types/comment";
+import type { CommentResponseDto } from "@/types/api";
 import type { CreateNestedCommentDto } from "@/types/comment";
 
 interface CommentListProps {
-  comments: NestedCommentResponseDto[];
+  comments: CommentResponseDto[];
   loading: boolean;
   postId: string;
 }
@@ -36,10 +36,10 @@ export function CommentList({ comments, loading, postId }: CommentListProps) {
     }
   };
 
-  const handleReplyComment = (parentId: string, content: string) => {
+  const handleReplyComment = (parentCommentId: string, content: string) => {
     const data: CreateNestedCommentDto = {
       content,
-      parentId
+      parentCommentId
     };
     createCommentMutation.mutate({
       postId,
@@ -77,6 +77,7 @@ export function CommentList({ comments, loading, postId }: CommentListProps) {
             currentUser={currentUser}
             onReply={handleReplyComment}
             isReplying={createCommentMutation.isPending}
+            postId={postId}
           />
         ))}
       </ul>

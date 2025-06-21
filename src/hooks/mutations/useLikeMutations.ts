@@ -15,6 +15,7 @@ export function useLikeMutations() {
     mutationFn: (commentId: string) => likesApi.likeComment(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments"] });
+      queryClient.invalidateQueries({ queryKey: ["replies"] });
     },
   });
 

@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Avatar } from "../ui/Avatar";
 import { UserMeta } from "../ui/UserMeta";
 import { Button } from "../ui/Button";
-import { UserResponseDto } from "@/types/api";
-import { NestedCommentResponseDto } from "@/types/comment";
+import { UserResponseDto, CommentResponseDto } from "@/types/api";
 import { CommentReplyInput } from "./CommentReplyInput";
+import { useReplies } from "../../hooks/queries/useComments";
 import placeholderUserAvatar from "@/assets/images/placeholder_user_avatar.png";
 
 export interface CommentProps {
-  comment: NestedCommentResponseDto;
+  comment: CommentResponseDto;
   onLike: (commentId: string) => void;
   isLiking: boolean;
   onDelete: (commentId: string) => void;
@@ -16,6 +16,7 @@ export interface CommentProps {
   currentUser: UserResponseDto;
   onReply: (commentId: string, content: string) => void;
   isReplying: boolean;
+  postId: string;
   level?: number;
 }
 
@@ -28,13 +29,24 @@ export function Comment({
   currentUser,
   onReply,
   isReplying,
+  postId,
   level = 0 
 }: CommentProps) {
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  
+  const { data: replies, isLoading: loadingReplies } = useReplies(
+    showReplies ? postId : undefined,
+    showReplies ? comment.id : undefined
+  );
 
   const handleReply = (content: string) => {
     onReply(comment.id, content);
     setShowReplyInput(false);
+  };
+
+  const handleViewReplies = () => {
+    setShowReplies(true);
   };
 
   const maxLevel = 2; // Maximum nesting level (0, 1, 2 = 3 levels total)
@@ -113,23 +125,50 @@ export function Comment({
           </div>
         )}
 
-        {comment.replies && comment.replies.length > 0 && (
-          <ul className="mt-2 space-y-4">
-            {comment.replies.map((reply) => (
-              <Comment
-                key={reply.id}
-                comment={reply}
-                onLike={onLike}
-                isLiking={isLiking}
-                onDelete={onDelete}
-                isDeleting={isDeleting}
-                currentUser={currentUser}
-                onReply={onReply}
-                isReplying={isReplying}
-                level={level + 1}
-              />
-            ))}
-          </ul>
+        {/* Show "View Replies" button if there are replies */}
+        {comment.replyCount > 0 && !showReplies && (
+          <div className="mt-2">
+            <Button
+              variant="ghost"
+              className="h-6 p-0 text-xs text-[#1877F2] dark:text-[#1877F2] hover:bg-transparent"
+              onClick={handleViewReplies}
+            >
+              View {comment.replyCount} {comment.replyCount === 1 ? 'reply' : 'replies'}
+            </Button>
+          </div>
+        )}
+
+        {/* Show replies when loaded */}
+        {showReplies && (
+          <div className="mt-2">
+            {loadingReplies ? (
+              <div className="text-xs text-[#65676B] dark:text-[#B0B3B8] py-2">
+                Loading replies...
+              </div>
+            ) : replies && replies.length > 0 ? (
+              <ul className="space-y-4">
+                {replies.map((reply) => (
+                  <Comment
+                    key={reply.id}
+                    comment={reply}
+                    onLike={onLike}
+                    isLiking={isLiking}
+                    onDelete={onDelete}
+                    isDeleting={isDeleting}
+                    currentUser={currentUser}
+                    onReply={onReply}
+                    isReplying={isReplying}
+                    postId={postId}
+                    level={level + 1}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <div className="text-xs text-[#65676B] dark:text-[#B0B3B8] py-2">
+                No replies yet
+              </div>
+            )}
+          </div>
         )}
       </div>
     </li>

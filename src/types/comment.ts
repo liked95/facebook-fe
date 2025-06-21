@@ -1,11 +1,9 @@
-import type { CommentResponseDto } from "./api";
-
-export interface NestedCommentResponseDto extends CommentResponseDto {
-  replies?: NestedCommentResponseDto[];
-  parentId?: string;
-}
-
 export interface CreateNestedCommentDto {
   content: string;
-  parentId?: string;
+  parentCommentId?: string;
+}
+
+export interface RepliesQueryParams {
+  pageNumber?: number;
+  pageSize?: number;
 } 

@@ -38,6 +38,9 @@ export interface CommentResponseDto {
   createdAt: string;
   updatedAt: string;
   isEdited: boolean;
+  level: number;
+  parentCommentId: string | null;
+  replyCount: number;
   userId: string;
   username: string | null;
   userAvatarUrl: string | null;
@@ -93,6 +96,7 @@ export interface UpdatePostDto {
 
 export interface CreateCommentDto {
   content: string;
+  parentCommentId?: string;
 }
 
 export interface UpdateCommentDto {

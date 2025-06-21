@@ -87,6 +87,11 @@ export const commentsApi = {
       params: { pageNumber, pageSize },
     }),
   
+  getReplies: (postId: string, commentId: string, pageNumber = 1, pageSize = 25) =>
+    api.get<ApiResponse<CommentResponseDto[]>>(`/Api/Posts/${postId}/comments/${commentId}/replies`, {
+      params: { pageNumber, pageSize },
+    }),
+  
   create: (postId: string, data: CreateCommentDto) =>
     api.post<ApiResponse<CommentResponseDto>>(`/Api/Posts/${postId}/comments`, data),
   
