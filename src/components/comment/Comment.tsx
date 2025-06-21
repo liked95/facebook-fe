@@ -65,12 +65,12 @@ export function Comment({
         <>
           {/* Vertical line */}
           <div
-            className={`absolute -left-4 w-0.5 bg-gray-300 dark:bg-gray-600 
+            className={`absolute -left-6 w-0.5 bg-gray-300 dark:bg-gray-600 
                
               ${isLastReply ? "h-5" : "h-[calc(100%+1rem)]"}`}
           ></div>
           {/* Horizontal line */}
-          <div className="absolute -left-4 top-5 h-0.5 w-7 bg-gray-300 dark:bg-gray-600"></div>
+          <div className="absolute -left-6 top-5 h-0.5 w-6 bg-gray-300 dark:bg-gray-600"></div>
         </>
       )}
 
@@ -82,10 +82,10 @@ export function Comment({
         {/* Vertical line */}
         {!isLeaf && (
           <div
-            className={`relative  w-0.5 bg-gray-300 dark:bg-gray-600 
-              left-6 
+            className={`absolute  w-0.5 bg-gray-300 dark:bg-gray-600 
+              left-4 
               top-9
-              h-24
+              h-20
               `}
           ></div>
         )}

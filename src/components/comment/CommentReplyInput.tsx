@@ -31,7 +31,7 @@ export function CommentReplyInput({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-start gap-2 pl-10">
+    <form onSubmit={handleSubmit} className="flex items-start gap-2">
       <Avatar
         src={currentUser.avatarUrl || placeholderUserAvatar}
         alt={currentUser.username || "User"}
