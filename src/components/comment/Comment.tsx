@@ -6,6 +6,8 @@ import { UserResponseDto, CommentResponseDto } from "@/types/api";
 import { CommentReplyInput } from "./CommentReplyInput";
 import { useReplies } from "../../hooks/queries/useComments";
 import placeholderUserAvatar from "@/assets/images/placeholder_user_avatar.png";
+import likeIcon from "@/assets/images/like.svg";
+import { TimeFromNow } from "../ui/TimeFromNow";
 
 const MAX_REPLY_LEVEL = 10;
 
@@ -37,7 +39,6 @@ export function Comment({
   postId,
   level = 0,
   isLastReply,
-  isFirstReply,
   isLeaf,
 }: CommentProps) {
   const [showReplyInput, setShowReplyInput] = useState(false);
@@ -98,7 +99,6 @@ export function Comment({
           <div className="bg-[#F0F2F5] dark:bg-[#3A3B3C] rounded-md px-3 py-2">
             <UserMeta
               username={comment.username || "Unknown"}
-              createdAt={comment.createdAt}
               className="mb-1"
             />
             <div className="text-[15px] text-[#050505] dark:text-[#E4E6EB] mt-1 whitespace-pre-line">
@@ -107,11 +107,14 @@ export function Comment({
           </div>
 
           <div className="mt-1 flex items-center justify-between">
-            <div className="flex items-center gap-2 px-2">
+            <div className="flex items-center gap-2 px-2 text-xs text-[#65676B] dark:text-[#B0B3B8]">
+              <TimeFromNow date={comment.createdAt} />
               <Button
                 variant="ghost"
-                className={`h-6 p-0 text-xs text-[#65676B] dark:text-[#B0B3B8] hover:bg-transparent hover:text-[#1877F2] dark:hover:text-[#1877F2] ${
-                  comment.isLikedByCurrentUser ? "text-[#1877F2]" : ""
+                className={`h-6 p-0 font-bold text-xs hover:bg-transparent hover:underline ${
+                  comment.isLikedByCurrentUser 
+                    ? "text-[#1877F2] dark:text-[#1877F2]" 
+                    : "text-[#65676B] dark:text-[#B0B3B8]"
                 }`}
                 onClick={() => onLike(comment.id)}
                 disabled={isLiking}
@@ -119,33 +122,37 @@ export function Comment({
                 Like
               </Button>
 
-              <span className="text-xs text-[#65676B] dark:text-[#B0B3B8]">
-                {comment.likesCount} likes
-              </span>
-
               {level < MAX_REPLY_LEVEL && (
                 <Button
                   variant="ghost"
-                  className="h-6 p-0 text-xs text-[#65676B] dark:text-[#B0B3B8] hover:bg-transparent"
+                  className="h-6 p-0 font-bold text-xs text-[#65676B] dark:text-[#B0B3B8] hover:bg-transparent hover:underline"
                   onClick={() => setShowReplyInput(true)}
                 >
                   Reply
                 </Button>
               )}
-            </div>
 
-            {comment.userId === currentUser.id && (
-              <div>
+              {comment.userId === currentUser.id && (
                 <Button
                   variant="ghost"
-                  className="h-6 p-0 text-xs text-[#e62e2e] dark:text-[#e62e2e] hover:bg-transparent"
+                  className="h-6 p-0 font-bold text-xs text-[#65676B] dark:text-[#B0B3B8] hover:bg-transparent hover:underline"
                   onClick={() => onDelete(comment.id)}
                   disabled={isDeleting}
                 >
                   Delete
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {comment.likesCount > 0 && (
+                <>
+                  <span className="text-xs text-[#65676B] dark:text-[#B0B3B8]">
+                    {comment.likesCount}
+                  </span>
+                  <img src={likeIcon} alt="like icon" className="w-4 h-4" />
+                </>
+              )}
+            </div>
           </div>
 
           {showReplyInput && (
