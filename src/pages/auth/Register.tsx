@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { useAuthMutations } from '../../hooks/mutations/useAuthMutations';
 import { Button } from '../../components/ui/Button';
@@ -9,6 +9,7 @@ import type { ApiError } from '../../types/api';
 
 export function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const { registerMutation } = useAuthMutations();
   const [formData, setFormData] = useState({
@@ -19,13 +20,16 @@ export function Register() {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Get the intended destination from location state, or default to home
+  const from = location.state?.from?.pathname || '/';
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     registerMutation.mutate(formData, {
       onSuccess: (response) => {
         if (response.data.success && response.data.data.token) {
           setAuth(response.data.data.user, response.data.data.token);
-          navigate('/');
+          navigate(from, { replace: true });
         }
       },
       onError: (error: Error) => {

@@ -34,13 +34,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor for handling 401 unauthorized responses
+// Response interceptor for handling 401 responses
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
+      // Clear auth data and redirect to login
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      
+      // Clear auth store state
+      const { useAuthStore } = await import('../store/auth');
+      useAuthStore.getState().clearAuth();
+      
+      // Only redirect if we're not already on login/register page
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/register') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
