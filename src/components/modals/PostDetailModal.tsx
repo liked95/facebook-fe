@@ -45,7 +45,6 @@ export function PostDetailModal({
           />
           <UserMeta
             username={post.username}
-            createdAt={post.createdAt}
             meta={
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <span>•</span>
