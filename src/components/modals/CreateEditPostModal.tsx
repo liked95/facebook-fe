@@ -1,5 +1,5 @@
 import { Modal } from "./Modal";
-import { CreatePost } from "../post/CreatePost";
+import { CreateEditPostForm } from "../post/CreateEditPostForm";
 import type { PostResponseDto, UserResponseDto } from "../../types/api";
 
 interface CreateEditPostModalProps {
@@ -12,7 +12,7 @@ interface CreateEditPostModalProps {
 export function CreateEditPostModal({ open, onClose, post, currentUser }: CreateEditPostModalProps) {
   return (
     <Modal open={open} onClose={onClose} widthClassName="max-w-2xl">
-      <CreatePost post={post} onClose={onClose} currentUser={currentUser} />
+      <CreateEditPostForm post={post} onClose={onClose} currentUser={currentUser} />
     </Modal>
   );
 } 

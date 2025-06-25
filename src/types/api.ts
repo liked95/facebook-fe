@@ -15,6 +15,24 @@ export interface AuthResponseDto {
   user: UserResponseDto;
 }
 
+export interface MediaFileDto {
+  id: string;
+  fileName: string;
+  originalFileName: string;
+  fileSize: number;
+  mimeType: string;
+  mediaType: string;
+  blobUrl: string;
+  thumbnailUrl: string | null;
+  width: number | null;
+  height: number | null;
+  duration: number | null;
+  displayOrder: number;
+  processingStatus: string;
+  isProcessed: boolean;
+  createdAt: string;
+}
+
 export interface PostResponseDto {
   id: string;
   content: string | null;
@@ -30,6 +48,7 @@ export interface PostResponseDto {
   commentsCount: number;
   likesCount: number;
   isLikedByCurrentUser: boolean;
+  mediaFiles?: MediaFileDto[];
 }
 
 export interface CommentResponseDto {

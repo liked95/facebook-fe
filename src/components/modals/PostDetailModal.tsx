@@ -4,7 +4,8 @@ import { UserMeta } from "../ui/UserMeta";
 import { CommentList } from "../comment/CommentList";
 import { CommentInput } from "../comment/CommentInput";
 import placeholderUserAvatar from "../../assets/images/placeholder_user_avatar.png";
-import type { PostResponseDto, UserResponseDto, CommentResponseDto } from "../../types/api";
+import type { PostResponseDto, UserResponseDto, CommentResponseDto, MediaFileDto } from "../../types/api";
+import { PostImages } from "../post/PostImages";
 
 interface PostDetailModalProps {
   post: PostResponseDto | null;
@@ -58,13 +59,18 @@ export function PostDetailModal({
         <div className="flex-1 overflow-y-auto p-4 ">
           <div className="mb-4 pb-4 border-b border-[#e3e8f0] dark:border-[#2a2d34]">
             <p className="text-lg whitespace-pre-wrap">{post.content}</p>
-            {post.imageUrl && (
-              <div className="mt-4">
-                <img
-                  src={post.imageUrl}
-                  alt="Post media"
-                  className="max-h-96 rounded-lg object-contain"
-                />
+            {(post.mediaFiles && post.mediaFiles.length > 0) && (
+              <div className="mt-2">
+                <PostImages images={post.mediaFiles.filter((f: MediaFileDto) => f.mediaType === 'image').map((f: MediaFileDto) => f.blobUrl)} />
+              </div>
+            )}
+            {(post.mediaFiles && post.mediaFiles.some((f: MediaFileDto) => f.mediaType === 'video')) && (
+              <div className="mt-2">
+                <div className="grid grid-cols-1 gap-2">
+                  {post.mediaFiles.filter((f: MediaFileDto) => f.mediaType === 'video').map((f: MediaFileDto, idx: number) => (
+                    <video key={idx} src={f.blobUrl} controls className="w-full rounded-lg object-cover max-h-96" />
+                  ))}
+                </div>
               </div>
             )}
           </div>

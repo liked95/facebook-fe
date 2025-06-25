@@ -4,12 +4,10 @@ import type {
   AuthResponseDto,
   CommentResponseDto,
   CreateCommentDto,
-  CreatePostDto,
   LoginDto,
   PostResponseDto,
   RegisterDto,
   UpdateCommentDto,
-  UpdatePostDto,
   UserResponseDto,
   LikeActionResult,
   PostLikeDto,
@@ -70,11 +68,11 @@ export const authApi = {
 
 // Posts API
 export const postsApi = {
-  create: (data: CreatePostDto) =>
-    api.post<ApiResponse<PostResponseDto>>('/Api/Posts', data),
+  create: (data: FormData) =>
+    api.post<ApiResponse<PostResponseDto>>('/Api/Posts', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   
-  update: (postId: string, data: UpdatePostDto) =>
-    api.put<ApiResponse<PostResponseDto>>(`/Api/Posts/${postId}`, data),
+  update: (postId: string, data: FormData) =>
+    api.put<ApiResponse<PostResponseDto>>(`/Api/Posts/${postId}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   
   delete: (postId: string) =>
     api.delete(`/Api/Posts/${postId}`),

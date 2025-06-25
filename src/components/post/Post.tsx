@@ -10,7 +10,7 @@ import { PostActions } from "./PostActions";
 import { PostImages } from "./PostImages";
 import { PostPrivacy } from "./PostPrivacy";
 import { ConfirmModal } from "../modals/ConfirmModal";
-import type { PostResponseDto } from "../../types/api";
+import type { PostResponseDto, MediaFileDto } from "../../types/api";
 import { usePostMutations } from "../../hooks/mutations/usePostMutations";
 import { useLikeMutations } from "../../hooks/mutations/useLikeMutations";
 
@@ -108,7 +108,17 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
         </div>
 
         {/* Post Images */}
-        {post.imageUrl && <PostImages images={post.imageUrl.split(",")} />}
+        {post.mediaFiles && post.mediaFiles.length > 0 && (
+          <PostImages images={post.mediaFiles.filter((f: MediaFileDto) => f.mediaType === 'image').map((f: MediaFileDto) => f.blobUrl)} />
+        )}
+        {/* Post Videos (optional, if you want to support videos) */}
+        {post.mediaFiles && post.mediaFiles.some((f: MediaFileDto) => f.mediaType === 'video') && (
+          <div className="px-4 pb-2 grid grid-cols-1 gap-2">
+            {post.mediaFiles.filter((f: MediaFileDto) => f.mediaType === 'video').map((f: MediaFileDto, idx: number) => (
+              <video key={idx} src={f.blobUrl} controls className="w-full rounded-lg object-cover max-h-96" />
+            ))}
+          </div>
+        )}
 
         {/* Post Stats */}
         <div className="px-4 py-2 border-t border-[#e3e8f0] dark:border-[#2a2d34]">
