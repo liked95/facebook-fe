@@ -43,7 +43,12 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
   };
 
   const handleConfirmDelete = () => {
-    deletePostMutation.mutate(post.id);
+    deletePostMutation.mutate(post.id, {
+      onSuccess: () => {
+        setShowDeleteConfirm(false);
+        deletePostMutation.reset();
+      },
+    });
   };
 
   const handleLike = () => {
@@ -181,6 +186,7 @@ export function Post({ post, onOpenCommentModal, onEdit }: PostProps) {
         confirmText="Delete"
         cancelText="Cancel"
         variant="danger"
+        isLoading={deletePostMutation.isPending}
       />
     </>
   );

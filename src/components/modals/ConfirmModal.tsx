@@ -10,6 +10,8 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: "default" | "danger";
+  isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
 export function ConfirmModal({
@@ -21,6 +23,8 @@ export function ConfirmModal({
   confirmText = "Confirm",
   cancelText = "Cancel",
   variant = "default",
+  isLoading = false,
+  isDisabled = false,
 }: ConfirmModalProps) {
   return (
     <Modal open={open} onClose={onClose} widthClassName="max-w-md">
@@ -32,17 +36,21 @@ export function ConfirmModal({
           {description}
         </p>
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>
           <Button
             variant={variant}
             onClick={() => {
-              onConfirm();
-              onClose();
+              if (!isLoading) onConfirm();
             }}
+            disabled={isLoading || isDisabled}
           >
-            {confirmText}
+            {isLoading ? (
+              <span className="flex items-center gap-2"><span className="loader size-4 border-2 border-t-transparent rounded-full animate-spin"></span>{confirmText}</span>
+            ) : (
+              confirmText
+            )}
           </Button>
         </div>
       </div>

@@ -88,16 +88,32 @@ export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostPro
       });
     }
 
-    if (isEdit && post) {
-      updatePostMutation.mutate({ postId: post.id, data: formData });
-    } else {
-      createPostMutation.mutate(formData);
-    }
+    const resetForm = () => {
+      setContent('');
+      setPrivacy(0);
+      setMediaList([]);
+    };
 
-    setContent('');
-    setPrivacy(0);
-    setMediaList([]);
-    onClose();
+    if (isEdit && post) {
+      updatePostMutation.mutate(
+        { postId: post.id, data: formData },
+        {
+          onSuccess: () => {
+            resetForm();
+            onClose();
+            updatePostMutation.reset();
+          },
+        }
+      );
+    } else {
+      createPostMutation.mutate(formData, {
+        onSuccess: () => {
+          resetForm();
+          onClose();
+          createPostMutation.reset();
+        },
+      });
+    }
   };
 
   const isPending = createPostMutation.isPending || updatePostMutation.isPending;
@@ -179,9 +195,14 @@ export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostPro
         </div>
       </div>
       <div className="flex justify-end gap-2 px-6 pb-6">
-        <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>Cancel</Button>
         <Button type="submit" disabled={isPending || !content.trim()}>
-          {isPending ? (isEdit ? 'Saving...' : 'Posting...') : isEdit ? 'Save' : 'Post'}
+          {isPending ? (
+            <span className="flex items-center gap-2">
+              <span className="loader size-4 border-2 border-t-transparent rounded-full animate-spin"></span>
+              {isEdit ? 'Saving...' : 'Posting...'}
+            </span>
+          ) : isEdit ? 'Save' : 'Post'}
         </Button>
       </div>
     </form>
