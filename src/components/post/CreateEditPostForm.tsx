@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Button } from '../ui/Button';
 import { Textarea } from '../ui/Textarea';
 import { Avatar } from '../ui/Avatar';
@@ -13,62 +13,54 @@ export interface CreatePostProps {
   currentUser: UserResponseDto;
 }
 
+type MediaListItem = MediaFileDto | File;
+
+function isFile(item: MediaListItem): item is File {
+  return (item as File).type !== undefined;
+}
+
 export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostProps) {
   const isEdit = !!post;
   const [content, setContent] = useState(post?.content || '');
   const [privacy, setPrivacy] = useState<PrivacyType>(post?.privacy ?? 0);
   const { createPostMutation, updatePostMutation } = usePostMutations();
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
-  const [existingMedia, setExistingMedia] = useState<MediaFileDto[]>(post?.mediaFiles || []);
-  const [removedExistingMedia, setRemovedExistingMedia] = useState<MediaFileDto[]>([]);
+  const [mediaList, setMediaList] = useState<MediaListItem[]>(post?.mediaFiles ? [...post.mediaFiles] : []);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   useEffect(() => {
     if (isEdit && post) {
       setContent(post?.content || '');
       setPrivacy(post?.privacy ?? 0);
-      setMediaFiles([]);
-      setMediaPreviews([]);
-      setExistingMedia(post?.mediaFiles || []);
-      setRemovedExistingMedia([]);
+      setMediaList(post?.mediaFiles ? [...post.mediaFiles] : []);
     } else {
       setContent('');
       setPrivacy(0);
-      setMediaFiles([]);
-      setMediaPreviews([]);
-      setExistingMedia([]);
-      setRemovedExistingMedia([]);
+      setMediaList([]);
     }
   }, [isEdit, post]);
-  
-  console.log("Go here: ", isEdit);
-  console.log("🚀 ~ CreateEditPostForm ~ mediaPreviews:", mediaPreviews)
-  console.log("🚀 ~ CreateEditPostForm ~ mediaFiles:", mediaFiles)
-  
-  // Generate previews when mediaFiles changes
+
+  // Generate preview URLs for new files and clean up on unmount or change
+  const filePreviews = useMemo(() => {
+    const urls = mediaList.map(item => isFile(item) ? URL.createObjectURL(item) : undefined);
+    return urls;
+  }, [mediaList]);
+
   useEffect(() => {
-    const urls = mediaFiles.map(file => URL.createObjectURL(file));
-    setMediaPreviews(urls);
     return () => {
-      urls.forEach(url => URL.revokeObjectURL(url));
+      filePreviews.forEach(url => {
+        if (url) URL.revokeObjectURL(url);
+      });
     };
-  }, [mediaFiles]);
+  }, [filePreviews]);
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    setMediaFiles(prev => [...prev, ...files]);
+    setMediaList(prev => [...prev, ...files]);
   };
 
-  const handleRemoveMedia = (index: number, isExisting: boolean) => {
-    if (isExisting) {
-      setRemovedExistingMedia(prev => [...prev, existingMedia[index]]);
-      setExistingMedia(prev => prev.filter((_, i) => i !== index));
-    } else {
-      setMediaFiles(prev => prev.filter((_, i) => i !== index));
-      setMediaPreviews(prev => prev.filter((_, i) => i !== index));
-    }
+  const handleRemoveMedia = (index: number) => {
+    setMediaList(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -78,11 +70,22 @@ export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostPro
     const formData = new FormData();
     formData.append('content', content.trim());
     formData.append('privacy', privacy.toString());
-    mediaFiles.forEach(file => {
-      formData.append('mediaFiles', file);
+
+    // Collect ordered existing media IDs and append new files
+    const existingMediaIds: string[] = [];
+    mediaList.forEach((item) => {
+      if (isFile(item)) {
+        formData.append('mediaFiles', item);
+      } else {
+        existingMediaIds.push(item.id);
+      }
     });
-    if (isEdit && removedExistingMedia.length > 0) {
-      formData.append('removedMediaIds', JSON.stringify(removedExistingMedia.map(m => m.id)));
+
+    if (isEdit) {
+      // Append each existing media ID individually with the same key name
+      existingMediaIds.forEach(id => {
+        formData.append('existingMediaIds', id);
+      });
     }
 
     if (isEdit && post) {
@@ -93,14 +96,29 @@ export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostPro
 
     setContent('');
     setPrivacy(0);
-    setMediaFiles([]);
-    setMediaPreviews([]);
-    setExistingMedia([]);
-    setRemovedExistingMedia([]);
+    setMediaList([]);
     onClose();
   };
 
   const isPending = createPostMutation.isPending || updatePostMutation.isPending;
+
+  // Prepare preview data for MediaPreviewGrid
+  const previewProps = mediaList.reduce<{
+    existingMedia: MediaFileDto[];
+    mediaPreviews: string[];
+    mediaFiles: File[];
+  }>(
+    (acc, item, idx) => {
+      if (isFile(item)) {
+        acc.mediaFiles.push(item);
+        acc.mediaPreviews.push(filePreviews[idx] || '');
+      } else {
+        acc.existingMedia.push(item);
+      }
+      return acc;
+    },
+    { existingMedia: [], mediaPreviews: [], mediaFiles: [] }
+  );
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
@@ -129,11 +147,11 @@ export function CreateEditPostForm({ post, onClose, currentUser }: CreatePostPro
               className="min-h-[120px] resize-none text-lg"
               required
             />
-            {(existingMedia.length > 0 || mediaPreviews.length > 0) && (
+            {mediaList.length > 0 && (
               <MediaPreviewGrid
-                existingMedia={existingMedia}
-                mediaPreviews={mediaPreviews}
-                mediaFiles={mediaFiles}
+                existingMedia={previewProps.existingMedia}
+                mediaPreviews={previewProps.mediaPreviews}
+                mediaFiles={previewProps.mediaFiles}
                 handleRemoveMedia={handleRemoveMedia}
                 inline
               />
